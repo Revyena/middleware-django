@@ -29,7 +29,7 @@ class DiscordUser(BaseModel):
     user = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
 
-class DiscordLevels(GuildScopedModel):
+class DiscordLevel(GuildScopedModel):
     user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE, related_name='users')
     level = models.IntegerField(default=0)
     experience = models.IntegerField(default=0)
@@ -37,7 +37,7 @@ class DiscordLevels(GuildScopedModel):
     class Meta:
         unique_together = ('guild', 'user')
 
-class DiscordSettings(BaseModel):
+class DiscordSetting(BaseModel):
     SCOPES = [
         ('GUILD', 'Guild'),
         ('USER', 'User'),
