@@ -2,8 +2,8 @@ from django.contrib import admin
 
 from .models import (
     DiscordGuild,
-    DiscordLevels,
-    DiscordSettings,
+    DiscordLevel,
+    DiscordSetting,
     DiscordUser,
 )
 
@@ -14,13 +14,15 @@ class DiscordUserAdmin(admin.ModelAdmin):
     model = DiscordUser
 
 class DiscordLevelsAdmin(admin.ModelAdmin):
-    model = DiscordLevels
+    model = DiscordLevel
 
 class DiscordSettingsAdmin(admin.ModelAdmin):
-    model = DiscordSettings
+    model = DiscordSetting
+
+admin.site.site_header = "Mamono Management"
 
 admin.site.register(DiscordGuild, DiscordGuildAdmin)
 admin.site.register(DiscordUser, DiscordUserAdmin)
-admin.site.register(DiscordLevels, DiscordLevelsAdmin)
-admin.site.register(DiscordSettings, DiscordSettingsAdmin)
+admin.site.register(DiscordLevel, DiscordLevelsAdmin)
+admin.site.register(DiscordSetting, DiscordSettingsAdmin)
 
