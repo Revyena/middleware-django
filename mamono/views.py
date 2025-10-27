@@ -26,16 +26,12 @@ class UUIDLookupViewSet(viewsets.ViewSet):
     based on a string model name and a specific entity ID, then returning its PK (UUID/ID).
     """
 
-    # We use an @action because the primary key lookup is NOT a standard list or retrieve.
-    @action(detail=False, methods=['get'])
-    def lookup(self, request):
-        entity_id = request.query_params.get('id')
+    def retrieve(self, request, pk=None):
         model_name = request.query_params.get('model')
 
-        if not entity_id or not model_name:
-            missing_param = 'id' if not entity_id else 'model'
+        if not model_name:
             return Response(
-                {"error": f"Missing required parameter: '{missing_param}'."},
+                {"error": "Missing required model parameter."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -46,35 +42,42 @@ class UUIDLookupViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        try:
-            field_name = FIELD_MAPPING[ModelClass]
-        except KeyError:
+        field_name = FIELD_MAPPING.get(ModelClass)
+        if not field_name:
             return Response(
                 {"error": f"Model '{model_name}' is not configured in FIELD_MAPPING."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        lookup_params = {field_name: entity_id}
-
         try:
-            entity_instance = get_object_or_404(ModelClass, **lookup_params)
-
+            entity_instance = get_object_or_404(ModelClass, **{field_name: pk})
         except Exception as e:
             return Response(
-                {"error": f"Lookup failed for entity ID: {entity_id}. Details: {e}"},
+                {"error": f"Lookup failed for entity ID: {pk}. Details: {e}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        uuid_to_return = str(entity_instance.pk)
-
         return Response({
             "model": model_name,
-            "id": entity_id,
-            "uuid": uuid_to_return
+            "id": pk,
+            "uuid": str(entity_instance.pk)
         }, status=status.HTTP_200_OK)
-
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+class LevelViewSet(viewsets.ModelViewSet):
+    queryset = DiscordLevel.objects.all()
+    serializer_class = LevelSerializer
+    filter_backends = [DjangoFilterBackend]
+    lookup_field = "user_id"
+
+    def get_queryset(self):
+        guild_id = self.request.query_params.get('guild')
+        if not guild_id:
+            return DiscordLevel.objects.none()
+        return DiscordLevel.objects.filter(guild_id=guild_id)
+
+

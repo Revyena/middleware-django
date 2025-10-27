@@ -18,11 +18,12 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from mamono.views import UserViewSet, UUIDLookupViewSet
+from mamono.views import UserViewSet, UUIDLookupViewSet, LevelViewSet
 
 router = routers.DefaultRouter()
 router.register(r'uuid', UUIDLookupViewSet, basename='uuid')
 router.register(r'users', UserViewSet)
+router.register(r'levels', LevelViewSet)
 
 # rls
 urlpatterns = [
